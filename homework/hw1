@@ -2,12 +2,14 @@ import streamlit as st
 from openai import OpenAI
 import fitz
 
-def extract_text_from_pdf(pdf_path):
-    document = fitz.open(pdf_path)
+# PyMuPDF Function
+def extract_text_from_pdf(uploaded_file):
+    document = fitz.open(stream=uploaded_file.read(), filetype="pdf")
     text = ''
     for page_num in range(len(document)):
         page = document.load_page(page_num)
         text += page.get_text()
+    document.close() 
     return text
 
 # Show title and description.
@@ -18,8 +20,6 @@ st.write(
 )
 
 # Ask user for their OpenAI API key via `st.text_input`.
-# Alternatively, you can store the API key in `./.streamlit/secrets.toml` and access it
-# via `st.secrets`, see https://docs.streamlit.io/develop/concepts/connections/secrets-management
 openai_api_key = st.text_input("OpenAI API Key", type="password")
 if not openai_api_key:
     st.info("Please add your OpenAI API key to continue.", icon="🗝️")
@@ -47,7 +47,9 @@ else:
         elif file_extension == 'pdf':
             document = extract_text_from_pdf(uploaded_file)
         else:
-            st.error("Unsupported file type.")   
+            st.error("Unsupported file type.")
+            st.stop()
+            
         messages = [
             {
                 "role": "user",
@@ -56,6 +58,7 @@ else:
         ]
         model_options = ["gpt-3.5-turbo", "gpt-4-turbo", "gpt-4o","gpt-4o-mini"]
         selected_model = st.selectbox("Select Model", model_options)
+        
         # Generate an answer using the OpenAI API.
         stream = client.chat.completions.create(
             model=selected_model,
