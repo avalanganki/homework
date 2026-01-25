@@ -9,8 +9,8 @@ st.set_page_config(
 st.markdown('# 488 Homework')
 st.markdown('## :red[Ava Langanki]')
 
-p1 = st.Page('/workspaces/lab/Labs/hw1.py', title='Homework 1 - Document QA', icon='📄', default=False)
+p1 = st.Page('/workspaces/Homework/Labs/hw1.py', title='Homework 1 - Document QA', icon='📄', default=False)
 
-pg = st.navigation([p1, p2])
+pg = st.navigation([p1])
 
 pg.run()
