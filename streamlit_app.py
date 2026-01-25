@@ -1,6 +1,16 @@
 import streamlit as st
 
-st.title("🎈 My new app")
-st.write(
-    "Let's start building! For help and inspiration, head over to [docs.streamlit.io](https://docs.streamlit.io/)."
+st.set_page_config(
+    page_title="488 Homework - Data Manager",
+    page_icon="🔬",
+    layout="wide"
 )
+
+st.markdown('# 488 Homework')
+st.markdown('## :red[Ava Langanki]')
+
+p1 = st.Page('/workspaces/lab/Labs/hw1.py', title='Homework 1 - Document QA', icon='📄', default=False)
+
+pg = st.navigation([p1, p2])
+
+pg.run()
