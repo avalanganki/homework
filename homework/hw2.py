@@ -3,6 +3,16 @@ from openai import OpenAI
 import requests
 from bs4 import BeautifulSoup
 
+def read_url_content(url):
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        soup = BeautifulSoup(response.content, 'html.parser')
+        return soup.get_text()
+    except requests.RequestException as e:
+        print(f"Error reading {url}: (e)")
+        return None
+    
 st.title("Document QA For URL")
 secret_key = st.secrets.OPENAI_API_KEY
 client = OpenAI(api_key=secret_key)
