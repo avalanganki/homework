@@ -51,11 +51,14 @@ if uploaded_file and options:
         }
     ]
 
-
+if selected_model == 'OpenAI':
+    model_to_use = 'gpt-3.5-turbo'
+elif selected_model == 'Claude':
+    model_to_use = 'claude-sonnet-4-20250514'
     # where API choices happen model = selected model 
         
     stream = client.chat.completions.create(
-        model=selected_model,
+        model=model_to_use,
         messages=messages,
         stream=True,
     )
