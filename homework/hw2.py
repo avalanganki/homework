@@ -15,8 +15,8 @@ def read_url_content(url):
         return None
     
 st.title("Document QA For URL")
-secret_key = st.secrets.OPENAI_API_KEY
-key_two = st.secrets.ANTHROPIC_KEY
+secret_key = st.secrets['OPENAI_API_KEY']
+key_two = st.secrets['ANTHROPIC_KEY']
 
 model = st.sidebar.selectbox('Which LLM:', ['OpenAI', 'Claude'])
 
