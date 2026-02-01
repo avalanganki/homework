@@ -64,7 +64,6 @@ if st.button("Summarize") and url_input:
                         
                         stream = client.chat.completions.create(
                             model=selected_model,
-                            max_tokens=2048,
                             messages=messages,
                             stream=True,
                         )
@@ -79,6 +78,7 @@ if st.button("Summarize") and url_input:
                         
                         with client.messages.stream(
                             model=selected_model,
+                            max_tokens=2048,
                             messages=[
                                 {
                                     "role": "user",
