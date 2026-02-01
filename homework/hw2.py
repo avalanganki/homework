@@ -1,5 +1,6 @@
 import streamlit as st
 from openai import OpenAI
+from anthropic import Anthropic
 import requests
 from bs4 import BeautifulSoup
 
@@ -17,7 +18,8 @@ st.title("Document QA For URL")
 secret_key = st.secrets.OPENAI_API_KEY
 client = OpenAI(api_key=secret_key)
 
-st.sidebar.title("Language Menu")
+model = st.sidebar.selectbox('Which LLM:', ['OpenAI', 'Claude'])
+
 options = st.sidebar.selectbox('Choose language:',
     ('English', 'Spanish', 'Italian'))
 
@@ -29,41 +31,40 @@ else:
     prompt_instructions = "Summarize in italian"
 
 use_advanced_model = st.sidebar.checkbox('Use Advanced Model')
+if model == 'OpenAI':
+    if use_advanced_model:
+        selected_model = 'gpt-4o'
+    else:
+        selected_model = 'gpt-4o-mini'
+elif model == 'Claude':
+    if use_advanced_model:
+        selected_model = 'claude-opus-4-20250514'
+    else:
+        selected_model = 'claude-sonnet-4-20250514'
 
-if use_advanced_model:
-    model_to_use = 'gpt-4o'  
-else:
-    model_to_use = 'gpt-4o-mini' 
-st.sidebar.write("Using model: {model_to_use}")
+st.sidebar.write("Using model: {selected_model}")
 
-selected_model = "gpt-3.5-turbo" ##OPENAI OR CLAUDE -- FIND INSTRUCTIONS
+url_input = st.text_input("Enter URL:", placeholder="https://example.com")
 
-uploaded_file = st.file_uploader(
-    "Paste a URL", type=()
-    )
-
-if uploaded_file and options: 
-    document = uploaded_file.read()
-    messages = [
-        {
-            "role": "user",
-            "content": f"{prompt_instructions}\n\nDocument: {document}",
-        }
-    ]
-
-if selected_model == 'OpenAI':
-    model_to_use = 'gpt-3.5-turbo'
-elif selected_model == 'Claude':
-    model_to_use = 'claude-sonnet-4-20250514'
-    # where API choices happen model = selected model 
-        
-    stream = client.chat.completions.create(
-        model=model_to_use,
-        messages=messages,
-        stream=True,
-    )
-
-    st.write_stream(stream)
+if st.button("Summarize") and url_input: 
+    document = read_url_content(url_input)
+    if document:
+        messages = [
+                        {
+                            "role": "user",
+                            "content": f"{prompt_instructions}:\n\n{document}",
+                        }
+                    ]
+                    
+        stream = client.chat.completions.create(
+            model=selected_model,
+            messages=messages,
+            stream=True,
+        )
+    
+        st.write_stream(stream)
+    else:
+        st.error("Failed to fetch content from URL")
     
     # to do 
     # secret ai key DONE
