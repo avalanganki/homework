@@ -15,8 +15,8 @@ def read_url_content(url):
         return None
     
 st.title("Document QA For URL")
-secret_key = st.secrets['OPENAI_API_KEY']
-key_two = st.secrets['ANTHROPIC_KEY']
+secret_key = st.secrets.get('OPENAI_API_KEY')
+key_two = st.secrets.get('ANTHROPIC_KEY')
 
 model = st.sidebar.selectbox('Which LLM:', ['OpenAI', 'Claude'])
 
@@ -42,7 +42,7 @@ elif model == 'Claude':
     else:
         selected_model = 'claude-sonnet-4-20250514'
 
-st.sidebar.write("Using model: {selected_model}")
+st.sidebar.write(f"Using model: {selected_model}")
 
 url_input = st.text_input("Enter URL:", placeholder="https://example.com")
 
