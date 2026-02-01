@@ -16,8 +16,7 @@ def read_url_content(url):
     
 st.title("Document QA For URL")
 secret_key = st.secrets.OPENAI_API_KEY
-client = OpenAI(api_key=secret_key)
-key_two = st.secrets..ANTHROPIC_KEY
+key_two = st.secrets.ANTHROPIC_KEY
 
 model = st.sidebar.selectbox('Which LLM:', ['OpenAI', 'Claude'])
 
@@ -50,23 +49,46 @@ url_input = st.text_input("Enter URL:", placeholder="https://example.com")
 if st.button("Summarize") and url_input: 
     document = read_url_content(url_input)
     if document:
-        messages = [
-                        {
-                            "role": "user",
-                            "content": f"{prompt_instructions}:\n\n{document}",
-                        }
-                    ]
-                    
-        stream = client.chat.completions.create(
-            model=selected_model,
-            messages=messages,
-            stream=True,
-        )
-    
-        st.write_stream(stream)
+            with st.spinner("Generating summary..."):
+                if model == 'OpenAI':
+                    if not secret_key:
+                        st.error("OpenAI API key not found")
+                    else:
+                        client = OpenAI(api_key=secret_key)
+                        messages = [
+                            {
+                                "role": "user",
+                                "content": f"{prompt_instructions}:\n\n{document}",
+                            }
+                        ]
+                        
+                        stream = client.chat.completions.create(
+                            model=selected_model,
+                            messages=messages,
+                            stream=True,
+                        )
+                        
+                        st.write_stream(stream)
+                
+                elif model == 'Claude':
+                    if not key_two:
+                        st.error("Anthropic API key not found")
+                    else:
+                        client = Anthropic(api_key=key_two)
+                        
+                        with client.messages.stream(
+                            model=selected_model,
+                            messages=[
+                                {
+                                    "role": "user",
+                                    "content": f"{prompt_instructions}:\n\n{document}",
+                                }
+                            ],
+                        ) as stream:
+                            st.write_stream(stream.text_stream)
     else:
         st.error("Failed to fetch content from URL")
-    
+
     # to do 
     # secret ai key DONE
     # read url instead of pdf/txt
