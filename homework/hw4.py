@@ -18,7 +18,6 @@ if 'openai_client' not in st.session_state:
     st.session_state.openai_client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
 def extract_text_from_html(html_path):
-    """Extract text from HTML file"""
     with open(html_path, 'r', encoding='utf-8') as f:
         soup = BeautifulSoup(f.read(), 'html.parser')
         for script in soup(["script", "style"]):
@@ -88,7 +87,6 @@ if prompt := st.chat_input('Ask about iSchool student organizations...'):
     
     system_prompt = f"You help answer questions about iSchool student organizations. Use this info:\n{context}"
     
-    # Keep last 5 interactions (10 messages total)
     recent_messages = st.session_state.hw4_messages[-10:]
     messages = [{"role": "system", "content": system_prompt}] + recent_messages
     
