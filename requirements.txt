@@ -4,3 +4,4 @@ PyMuPDF
 anthropic
 bs4
 pysqlite3
+chromadb
