@@ -18,7 +18,6 @@ if 'openai_client' not in st.session_state:
     st.session_state.openai_client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
 def extract_text_from_html(html_path):
-    """Extract text from HTML file"""
     with open(html_path, 'r', encoding='utf-8') as f:
         soup = BeautifulSoup(f.read(), 'html.parser')
         for script in soup(["script", "style"]):
