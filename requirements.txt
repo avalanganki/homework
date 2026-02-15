@@ -3,3 +3,4 @@ openai
 PyMuPDF
 anthropic
 bs4
+pysqlite3

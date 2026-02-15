@@ -18,6 +18,7 @@ if 'openai_client' not in st.session_state:
     st.session_state.openai_client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
 def extract_text_from_html(html_path):
+    """Extract text from HTML file"""
     with open(html_path, 'r', encoding='utf-8') as f:
         soup = BeautifulSoup(f.read(), 'html.parser')
         for script in soup(["script", "style"]):
@@ -25,6 +26,15 @@ def extract_text_from_html(html_path):
         return soup.get_text()
 
 def chunk_document(text, filename):
+    """
+    CHUNKING METHOD: Character-based splitting (divide document in half)
+    
+    WHY THIS METHOD: 
+    - The HTML files are relatively short (typically under 5000 characters)
+    - Splitting in half creates 2 manageable chunks per document
+    - Each chunk stays well under the embedding model's token limit
+    - Simple approach that preserves context within each half
+    """
     mid = len(text) // 2
     chunk1 = text[:mid].strip()
     chunk2 = text[mid:].strip()
@@ -56,8 +66,17 @@ def add_to_collection(collection, text, chunk_id, file_name):
         metadatas=[{"filename": file_name, "chunk_id": chunk_id}]
     )
     
-st.title("HW4: iSchool ChatBot Using RAG")
+st.title("HW4: iSchool Student Organizations Chatbot")
 
+# Load HTML files once
+if 'hw4_loaded' not in st.session_state:
+    with st.spinner("Loading student organization pages..."):
+        loaded = load_htmls_to_collection('./su_orgs/', collection)
+        st.session_state.hw4_loaded = True
+        if loaded:
+            st.success("Data loaded!")
+
+# Initialize messages - buffer stores last 5 interactions (10 messages)
 if 'hw4_messages' not in st.session_state:
     st.session_state.hw4_messages = []
 
@@ -87,6 +106,7 @@ if prompt := st.chat_input('Ask about iSchool student organizations...'):
     
     system_prompt = f"You help answer questions about iSchool student organizations. Use this info:\n{context}"
     
+    # Keep last 5 interactions (10 messages total)
     recent_messages = st.session_state.hw4_messages[-10:]
     messages = [{"role": "system", "content": system_prompt}] + recent_messages
     
