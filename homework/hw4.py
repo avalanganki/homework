@@ -70,7 +70,7 @@ st.title("HW4: iSchool Student Organizations Chatbot")
 
 if 'hw4_loaded' not in st.session_state:
     with st.spinner("Loading student organization pages..."):
-        loaded = load_htmls_to_collection('./su_orgs/', collection)
+        loaded = load_htmls_to_collection('./su_orgs/su_orgs/', collection)
         st.session_state.hw4_loaded = True
         if loaded:
             st.success("Data loaded!")
