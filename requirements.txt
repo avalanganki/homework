@@ -3,5 +3,5 @@ openai
 PyMuPDF
 anthropic
 bs4
-pysqlite3
+pysqlite3-binary
 chromadb
