@@ -30,7 +30,7 @@ def chunk_document(text, filename):
     CHUNKING METHOD: Character-based splitting (divide document in half)
     
     WHY THIS METHOD: 
-    - The HTML files are relatively short (typically under 5000 characters)
+    - The HTML files are relatively short 
     - Splitting in half creates 2 manageable chunks per document
     - Each chunk stays well under the embedding model's token limit
     - Simple approach that preserves context within each half
@@ -68,7 +68,6 @@ def add_to_collection(collection, text, chunk_id, file_name):
     
 st.title("HW4: iSchool Student Organizations Chatbot")
 
-# Load HTML files once
 if 'hw4_loaded' not in st.session_state:
     with st.spinner("Loading student organization pages..."):
         loaded = load_htmls_to_collection('./su_orgs/', collection)
@@ -76,7 +75,6 @@ if 'hw4_loaded' not in st.session_state:
         if loaded:
             st.success("Data loaded!")
 
-# Initialize messages - buffer stores last 5 interactions (10 messages)
 if 'hw4_messages' not in st.session_state:
     st.session_state.hw4_messages = []
 
@@ -106,7 +104,6 @@ if prompt := st.chat_input('Ask about iSchool student organizations...'):
     
     system_prompt = f"You help answer questions about iSchool student organizations. Use this info:\n{context}"
     
-    # Keep last 5 interactions (10 messages total)
     recent_messages = st.session_state.hw4_messages[-10:]
     messages = [{"role": "system", "content": system_prompt}] + recent_messages
     
