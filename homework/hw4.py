@@ -121,6 +121,21 @@ if prompt := st.chat_input('Ask about iSchool student organizations...'):
 
 st.sidebar.write(f"Buffer: {min(10, len(st.session_state.hw4_messages))}/10 messages")
 
+st.sidebar.write(f"Documents in collection: {collection.count()}")
+
+# Add a test button
+if st.sidebar.button("Test Query"):
+    test_results = collection.query(
+        query_embeddings=[st.session_state.openai_client.embeddings.create(
+            input="student organizations", 
+            model='text-embedding-3-small'
+        ).data[0].embedding],
+        n_results=5
+    )
+    st.sidebar.write("Test results:")
+    for i, doc in enumerate(test_results['documents'][0]):
+        st.sidebar.write(f"{i+1}. {test_results['metadatas'][0][i]['filename']}: {doc[:200]}...")
+
 if st.sidebar.button("Clear"):
     st.session_state.hw4_messages = []
     st.rerun()
