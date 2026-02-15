@@ -93,13 +93,13 @@ if prompt := st.chat_input('Ask about iSchool student organizations...'):
 
     results = collection.query(
         query_embeddings=[query_embedding],
-        n_results=3
-    )
+        n_results=5
+)
 
     context = ""
     for i in range(len(results['documents'][0])):
         filename = results['metadatas'][0][i]['filename']
-        doc_text = results['documents'][0][i][:800]
+        doc_text = results['documents'][0][i][:2000]
         context += f"\n\nFrom {filename}:\n{doc_text}"
     
     system_prompt = f"You help answer questions about iSchool student organizations. Use this info:\n{context}"
