@@ -5,6 +5,7 @@ sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 import streamlit as st
 from openai import OpenAI
 import chromadb
+import pandas as pd
 
 chroma_client = chromadb.PersistentClient(path="./Chroma_DB_HW7")
 collection = chroma_client.get_or_create_collection("news_collection")
@@ -12,6 +13,45 @@ collection = chroma_client.get_or_create_collection("news_collection")
 if 'openai_client' not in st.session_state:
     st.session_state.openai_client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
+
+# --- Build DB if empty ---
+def add_to_collection(collection, text, chunk_id, metadata):
+    response = st.session_state.openai_client.embeddings.create(
+        input=text, model="text-embedding-3-small"
+    )
+    embedding = response.data[0].embedding
+    collection.add(
+        documents=[text],
+        ids=[chunk_id],
+        embeddings=[embedding],
+        metadatas=[metadata]
+    )
+
+
+def load_articles_to_collection(df, collection):
+    for idx, row in df.iterrows():
+        metadata = {
+            "company_name": str(row["company_name"]),
+            "date": str(row["Date"]),
+            "url": str(row["URL"]),
+            "days_since_2000": int(row["days_since_2000"])
+        }
+        add_to_collection(
+            collection,
+            text=row["Document"],
+            chunk_id=f"article_{idx}",
+            metadata=metadata
+        )
+
+
+if collection.count() == 0:
+    with st.spinner("Building article database... this may take a few minutes on first run."):
+        df = pd.read_csv("news.csv")
+        df = df.dropna(subset=["Document"]).reset_index(drop=True)
+        load_articles_to_collection(df, collection)
+
+
+# --- RAG Retrieval ---
 def get_relevant_articles(query, n_results=10):
     query_emb = st.session_state.openai_client.embeddings.create(
         input=query, model="text-embedding-3-small"
@@ -31,6 +71,7 @@ def get_relevant_articles(query, n_results=10):
             f"---"
         )
     return context
+
 
 SYSTEM_PROMPT = """You are a news assistant for a global law firm. Only use articles from the provided context. Never make up articles.
 For "most interesting news": rank by legal/business significance (lawsuits, deals, regulatory actions, executive changes). Return a numbered list with company, date, summary, why it matters, and URL.
