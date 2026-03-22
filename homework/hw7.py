@@ -43,7 +43,7 @@ def load_articles_to_collection(df, collection):
 
 
 if collection.count() == 0:
-    with st.spinner("Building article database..."):
+    with st.spinner("Building article database... this may take a few minutes on first run."):
         import os
         csv_path = os.path.join(os.path.dirname(__file__), "..", "news.csv")
         df = pd.read_csv(csv_path)
@@ -75,7 +75,7 @@ For "most interesting news": rank by legal/business significance (lawsuits, deal
 For topic/company questions: summarize the most relevant articles with company, date, and URL.
 Be concise and professional."""
 
-st.title("HW7: News Bot")
+st.title("HW7: News Intelligence Bot")
 
 if 'messages' not in st.session_state:
     st.session_state.messages = []
