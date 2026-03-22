@@ -8,29 +8,20 @@ import chromadb
 import pandas as pd
 import os
 
-@st.cache_resource
-def get_chroma_collection():
-    client = chromadb.Client()
-    return client.get_or_create_collection("news_collection")
-
-collection = get_chroma_collection()
-
 if 'openai_client' not in st.session_state:
     st.session_state.openai_client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
-def add_to_collection(collection, text, chunk_id, metadata):
-    response = st.session_state.openai_client.embeddings.create(
-        input=text, model="text-embedding-3-small"
-    )
-    embedding = response.data[0].embedding
-    collection.add(
-        documents=[text],
-        ids=[chunk_id],
-        embeddings=[embedding],
-        metadatas=[metadata]
-    )
+@st.cache_resource
+def build_collection():
+    client = chromadb.Client()
+    col = client.get_or_create_collection("news_collection")
 
-def load_articles_to_collection(df, collection):
+    openai_client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+
+    csv_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "news.csv")
+    df = pd.read_csv(csv_path)
+    df = df.dropna(subset=["Document"]).reset_index(drop=True)
+
     batch_size = 50
     for i in range(0, len(df), batch_size):
         batch = df.iloc[i:i + batch_size]
@@ -46,24 +37,22 @@ def load_articles_to_collection(df, collection):
             for _, row in batch.iterrows()
         ]
 
-        response = st.session_state.openai_client.embeddings.create(
+        response = openai_client.embeddings.create(
             input=texts, model="text-embedding-3-small"
         )
         embeddings = [item.embedding for item in response.data]
 
-        collection.add(
+        col.add(
             documents=texts,
             ids=ids,
             embeddings=embeddings,
             metadatas=metadatas
         )
 
-if collection.count() == 0:
-    with st.spinner("Building article database..."):
-        csv_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "news.csv")
-        df = pd.read_csv(csv_path)
-        df = df.dropna(subset=["Document"]).reset_index(drop=True)
-        load_articles_to_collection(df, collection)
+    return col
+
+with st.spinner("Loading articles..."):
+    collection = build_collection()
 
 def get_relevant_articles(query, n_results=10):
     query_emb = st.session_state.openai_client.embeddings.create(
