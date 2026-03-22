@@ -44,7 +44,9 @@ def load_articles_to_collection(df, collection):
 
 if collection.count() == 0:
     with st.spinner("Building article database..."):
-        df = pd.read_csv("news.csv")
+        import os
+        csv_path = os.path.join(os.path.dirname(__file__), "..", "news.csv")
+        df = pd.read_csv(csv_path)
         df = df.dropna(subset=["Document"]).reset_index(drop=True)
         load_articles_to_collection(df, collection)
 
@@ -68,13 +70,12 @@ def get_relevant_articles(query, n_results=10):
         )
     return context
 
-
 SYSTEM_PROMPT = """You are a news assistant for a global law firm. Only use articles from the provided context. Never make up articles.
 For "most interesting news": rank by legal/business significance (lawsuits, deals, regulatory actions, executive changes). Return a numbered list with company, date, summary, why it matters, and URL.
 For topic/company questions: summarize the most relevant articles with company, date, and URL.
 Be concise and professional."""
 
-st.title("HW7: News Intelligence Bot")
+st.title("HW7: News Bot")
 
 if 'messages' not in st.session_state:
     st.session_state.messages = []
