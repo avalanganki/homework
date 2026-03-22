@@ -31,18 +31,31 @@ def add_to_collection(collection, text, chunk_id, metadata):
     )
 
 def load_articles_to_collection(df, collection):
-    for idx, row in df.iterrows():
-        metadata = {
-            "company_name": str(row["company_name"]),
-            "date": str(row["Date"]),
-            "url": str(row["URL"]),
-            "days_since_2000": int(row["days_since_2000"])
-        }
-        add_to_collection(
-            collection,
-            text=row["Document"],
-            chunk_id=f"article_{idx}",
-            metadata=metadata
+    batch_size = 50
+    for i in range(0, len(df), batch_size):
+        batch = df.iloc[i:i + batch_size]
+        texts = batch["Document"].tolist()
+        ids = [f"article_{idx}" for idx in batch.index]
+        metadatas = [
+            {
+                "company_name": str(row["company_name"]),
+                "date": str(row["Date"]),
+                "url": str(row["URL"]),
+                "days_since_2000": int(row["days_since_2000"])
+            }
+            for _, row in batch.iterrows()
+        ]
+
+        response = st.session_state.openai_client.embeddings.create(
+            input=texts, model="text-embedding-3-small"
+        )
+        embeddings = [item.embedding for item in response.data]
+
+        collection.add(
+            documents=texts,
+            ids=ids,
+            embeddings=embeddings,
+            metadatas=metadatas
         )
 
 if collection.count() == 0:
