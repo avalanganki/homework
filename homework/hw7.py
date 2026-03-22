@@ -13,8 +13,6 @@ collection = chroma_client.get_or_create_collection("news_collection")
 if 'openai_client' not in st.session_state:
     st.session_state.openai_client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
-
-# --- Build DB if empty ---
 def add_to_collection(collection, text, chunk_id, metadata):
     response = st.session_state.openai_client.embeddings.create(
         input=text, model="text-embedding-3-small"
@@ -45,13 +43,11 @@ def load_articles_to_collection(df, collection):
 
 
 if collection.count() == 0:
-    with st.spinner("Building article database... this may take a few minutes on first run."):
+    with st.spinner("Building article database..."):
         df = pd.read_csv("news.csv")
         df = df.dropna(subset=["Document"]).reset_index(drop=True)
         load_articles_to_collection(df, collection)
 
-
-# --- RAG Retrieval ---
 def get_relevant_articles(query, n_results=10):
     query_emb = st.session_state.openai_client.embeddings.create(
         input=query, model="text-embedding-3-small"
