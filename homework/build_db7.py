@@ -7,7 +7,7 @@ import pandas as pd
 from openai import OpenAI
 import streamlit as st
 
-openai_client = OpenAI()
+openai_client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 chroma_client = chromadb.PersistentClient(path="./Chroma_DB_HW7")
 
 
@@ -60,7 +60,8 @@ def load_articles_to_collection(df, collection):
         if (idx + 1) % 50 == 0:
             print(f"Added {idx + 1} / {len(df)} articles")
 
-    print(f"\nDone! {collection.count()} articles stored in ./chroma_db")
+    print(f"\nDone! {collection.count()} articles stored in ./Chroma_DB_HW7")
+
 
 if __name__ == "__main__":
     df = load_and_clean_data()

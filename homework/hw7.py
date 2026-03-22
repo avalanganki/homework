@@ -5,50 +5,12 @@ sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 import streamlit as st
 from openai import OpenAI
 import chromadb
-import pandas as pd
 
 chroma_client = chromadb.PersistentClient(path="./Chroma_DB_HW7")
 collection = chroma_client.get_or_create_collection("news_collection")
 
 if 'openai_client' not in st.session_state:
     st.session_state.openai_client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
-
-def add_to_collection(collection, text, chunk_id, metadata):
-    response = st.session_state.openai_client.embeddings.create(
-        input=text, model="text-embedding-3-small"
-    )
-    embedding = response.data[0].embedding
-    collection.add(
-        documents=[text],
-        ids=[chunk_id],
-        embeddings=[embedding],
-        metadatas=[metadata]
-    )
-
-
-def load_articles_to_collection(df, collection):
-    for idx, row in df.iterrows():
-        metadata = {
-            "company_name": str(row["company_name"]),
-            "date": str(row["Date"]),
-            "url": str(row["URL"]),
-            "days_since_2000": int(row["days_since_2000"])
-        }
-        add_to_collection(
-            collection,
-            text=row["Document"],
-            chunk_id=f"article_{idx}",
-            metadata=metadata
-        )
-
-
-if collection.count() == 0:
-    with st.spinner("Building article database... this may take a few minutes on first run."):
-        import os
-        csv_path = os.path.join(os.path.dirname(__file__), "..", "news.csv")
-        df = pd.read_csv(csv_path)
-        df = df.dropna(subset=["Document"]).reset_index(drop=True)
-        load_articles_to_collection(df, collection)
 
 def get_relevant_articles(query, n_results=10):
     query_emb = st.session_state.openai_client.embeddings.create(
@@ -75,7 +37,7 @@ For "most interesting news": rank by legal/business significance (lawsuits, deal
 For topic/company questions: summarize the most relevant articles with company, date, and URL.
 Be concise and professional."""
 
-st.title("HW7: News Intelligence Bot")
+st.title("HW7: News Bot")
 
 if 'messages' not in st.session_state:
     st.session_state.messages = []
