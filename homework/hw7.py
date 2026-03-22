@@ -8,7 +8,11 @@ import chromadb
 import pandas as pd
 import os
 
-chroma_client = chromadb.PersistentClient(path="./Chroma_DB_HW7")
+chroma_client = chromadb.Client()
+
+if 'db_built' not in st.session_state:
+    st.session_state.db_built = False
+
 collection = chroma_client.get_or_create_collection("news_collection")
 
 if 'openai_client' not in st.session_state:
@@ -41,12 +45,13 @@ def load_articles_to_collection(df, collection):
             metadata=metadata
         )
 
-if collection.count() == 0:
+if not st.session_state.db_built and collection.count() == 0:
     with st.spinner("Building article database..."):
         csv_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "news.csv")
         df = pd.read_csv(csv_path)
         df = df.dropna(subset=["Document"]).reset_index(drop=True)
         load_articles_to_collection(df, collection)
+        st.session_state.db_built = True
 
 def get_relevant_articles(query, n_results=10):
     query_emb = st.session_state.openai_client.embeddings.create(
