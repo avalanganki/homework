@@ -1,3 +1,7 @@
+import sys
+__import__('pysqlite3')
+sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
+
 import chromadb
 import pandas as pd
 from openai import OpenAI
