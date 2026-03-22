@@ -4,7 +4,7 @@ from openai import OpenAI
 import streamlit as st
 
 openai_client = OpenAI()
-chroma_client = chromadb.PersistentClient(path="./chroma_db")
+chroma_client = chromadb.PersistentClient(path="./Chroma_DB_HW7")
 
 
 def load_and_clean_data(filepath="news.csv"):
